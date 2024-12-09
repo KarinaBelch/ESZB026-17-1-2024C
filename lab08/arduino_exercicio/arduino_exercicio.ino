@@ -1,6 +1,6 @@
 const int analogInPin = A0;            // o potenciômetro esta ligado ao pino A0
 int iniciaColeta = 0;
-int tempo_delay = 100;
+int tempo_delay = 200;
 char charRecebido;                     // cria uma variavel para armazenar o caractere recebido
 
 void setup(){
@@ -21,13 +21,17 @@ void loop(){
              break;
           
           case 'm':
+              Serial.write(tempo_delay & 0xFF);          // envia byte menos significativo
+              Serial.write(tempo_delay >> 8);            // envia byte mais significativo
               break;
           
           case 'a':
-            tempo_delay = tempo_delay + 100
+              tempo_delay = tempo_delay + 5;
+              break;
           
           case 'd':
-            tempo_delay = tempo_delay - 100
+              tempo_delay = tempo_delay - 5;
+              break;
           
              
           default:                     // outro comando, ignora...

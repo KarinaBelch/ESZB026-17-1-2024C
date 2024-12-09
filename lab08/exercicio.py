@@ -20,8 +20,18 @@ def saindo():
     print('Saindo')
 
 def medicao_arduino():
-  conexaoSerial.write(b'm')
-
+    conexaoSerial.write(b'p')
+    time.sleep(0.5)
+    conexaoSerial.flush()
+    conexaoSerial.write(b'm')
+    time.sleep(0.1)
+    print(conexaoSerial.inWaiting())
+    dadoInt1 = conexaoSerial.read()
+    dadoInt2 = conexaoSerial.read()
+    intervalo = float( (ord(dadoInt1) + ord(dadoInt2)*256.0) )
+    textoi.setText("Intervalo: "+ str(intervalo).zfill(3)+"ms" )
+    conexaoSerial.write(b'i')
+        
 def aumenta_aquisicao():
     conexaoSerial.write(b'a')
 
@@ -62,6 +72,9 @@ previousTime = time.time()*1000 # pega a hora atual, em milissegundos
 texto = pg.TextItem(text="", color=(255,255,0), anchor=(0,1))
 p1.addItem(texto)
 texto.setPos(0,0) # adiciona o texto na posicao (0,0) do grafico
+textoi = pg.TextItem(text="int:", color=(255,255,0), anchor=(0,1))
+p1.addItem(textoi)
+textoi.setPos(650,4) # adiciona o texto na posicao (0,0) do grafico
 
 proxy1 = QtGui.QGraphicsProxyWidget()
 botao1 = QtGui.QPushButton('Inicia')
@@ -92,6 +105,9 @@ botao5.clicked.connect(diminui_aquisicao)
 p2 = win.addLayout(row=1, col=0)
 p2.addItem(proxy1,row=0,col=0)
 p2.addItem(proxy2,row=1,col=0)
+p2.addItem(proxy3,row=2,col=0)
+p2.addItem(proxy4,row=3,col=0)
+p2.addItem(proxy5,row=4,col=0)
 
 conexaoSerial = serial.Serial('/dev/ttyACM0',115200)
 conexaoSerial.write(b'i')
