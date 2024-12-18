@@ -1,8 +1,4 @@
 //**Devices**//
-// Comunicação
-#include <SPI.h>
-#define NRO_MEDIDAS 1000
-
 // Define variaveis globais
 int vetor_medidas[ NRO_MEDIDAS ];
 unsigned char inicia_coleta = 0;
