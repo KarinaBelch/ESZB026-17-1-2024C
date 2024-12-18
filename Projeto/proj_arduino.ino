@@ -134,12 +134,12 @@ void loop() {
   if (Serial.available()){            // verifica se recebeu algum comando
       charRecebido = Serial.read();    // le o caractere recebido
       switch ( charRecebido ){
-          case 's':                    // inicia coleta
+          case 's':                    // Envia o SPO2
              Serial.write(SpO2_Hysteresis & 0xFF);          // envia byte menos significativo
              Serial.write(SpO2_Hysteresis >> 8);            // envia byte mais significativo
              break;
              
-          case 'b':                    // para a coleta
+          case 'b':                    // Envia o BPM
              Serial.write(HR_Hysteresis & 0xFF);          // envia byte menos significativo
              Serial.write(HR_Hysteresis >> 8);            // envia byte mais significativo
              break;
