@@ -4,10 +4,9 @@
 #define NRO_MEDIDAS 1000
 
 // Define variaveis globais
-int vetor_medidas_SPO2[ NRO_MEDIDAS ];
-int vetor_medidas_BPM[ NRO_MEDIDAS];
+int vetor_medidas[ NRO_MEDIDAS ];
 unsigned char inicia_coleta = 0;
-int contador = 0; 
+char charRecebido;                     // cria uma variavel para armazenar o caractere recebido
 
 //LCD
 #include <LiquidCrystal_I2C.h>
@@ -96,43 +95,6 @@ void setup() {
   PrintStart();
   CheckConfigure();
   PrintFormat();  
-
-  SPI . setDataMode ( SPI_MODE0 ); // configura SPI em modo 0
-  pinMode ( MISO , OUTPUT ); // define o pino MISO como saida , ja que o Arduino eh escravo
-  SPCR |= bit ( SPE ) ; // habilita o barramento SPI
-  SPI . attachInterrupt () ; // liga interrupcao para SPI 
-}
-
-// Funcao de interrupcao do barramento SPI
- ISR ( SPI_STC_vect )
- {
-   unsigned char byteRecebido = SPDR ; // le um byte do barramento SPI
-
-   switch ( byteRecebido ) {
-     case 'e': // solicitando dados , enviar ...
-       if ( contador < NRO_MEDIDAS *2 ) // x2 porque cada int sao 2 bytes
-       {
-           if ( ( contador % 2) == 0 ) // contador par
-           {
-           SPDR = vetor_medidas [ contador /2] & 0 xFF ; // envia byte menos significativo
-           }
-           else // contador impar
-           {
-             SPDR = vetor_medidas [( contador -1) /2] >> 8; // envia byte mais significativo
-           }
-           contador ++;
-           }
-           break ;
-
-         case 'i': // inicia coleta
-           SPDR = 'j'; // responde 'j ', indicando que entendeu comando
-           inicia_coleta = 1;
-           contador = 0;
-           break ;
-     
-         default : // outro byte recebido , ignora ...
-           break ;
- }
 }
 
 void loop() {
@@ -169,18 +131,22 @@ void loop() {
     ++count;
   }
 
-  int i;
-  if ( inicia_coleta == 1 )
-  {
-     for ( i = 0 ; i < NRO_MEDIDAS ; i ++ ){
-       // A funcao AnalogRead () demora 100 microssegundos para ser executada ,
-       // o que possibilita ate 10.000 amostras / segundo com essa abordagem
-       vetor_medidas_SPO2[i] = int(SpO2_Hysteresis);
-       vetor_medidas_BPM[i] = int(HR_Hysteresis)
-       delayMicroseconds (900) ; // atraso adicional para 1.000 medidas por segundo
-     }
-     inicia_coleta = 0;
-   }
+  if (Serial.available()){            // verifica se recebeu algum comando
+      charRecebido = Serial.read();    // le o caractere recebido
+      switch ( charRecebido ){
+          case 's':                    // inicia coleta
+             Serial.write(SpO2_Hysteresis & 0xFF);          // envia byte menos significativo
+             Serial.write(SpO2_Hysteresis >> 8);            // envia byte mais significativo
+             break;
+             
+          case 'b':                    // para a coleta
+             Serial.write(HR_Hysteresis & 0xFF);          // envia byte menos significativo
+             Serial.write(HR_Hysteresis >> 8);            // envia byte mais significativo
+             break;
+             
+          default:                     // outro comando, ignora...
+             break;
+      }
 }
 
 
