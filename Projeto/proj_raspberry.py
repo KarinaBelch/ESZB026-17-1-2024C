@@ -31,6 +31,11 @@ def obtem_so2():
     dadoInt2 = conexaoSerial.read()
     intervalo = float( (ord(dadoInt1) + ord(dadoInt2)*256.0) )
 
+    if(intervalo <= 96):
+        {
+            textoi.setText("Atenção: Saturação de Oxigênio com nível abaixo de 96%")
+        }
+
 def medicao_arduino():
     conexaoSerial.write(b'p')
     time.sleep(0.5)
